@@ -22,8 +22,6 @@ public final class FakeArmor extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         pl = this;
-
-        //equip code voor crossbow
         new FakeEquipment((Plugin)this) {
             protected boolean onEquipmentSending(EquipmentSendingEvent equipmentEvent) {
                 if (equipmentEvent.getSlot() == EnumWrappers.ItemSlot.HEAD && equipmentEvent.getEquipment().getType() == Material.DIAMOND_HELMET) {
@@ -48,11 +46,6 @@ public final class FakeArmor extends JavaPlugin implements Listener {
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
         }, 0, 1);
     }
-
-    public void registerCommands() {
-        //getCommand("team").setExecutor((CommandExecutor) new TeamCMD());
-    }
-
     @Override
     public void onDisable() {
         // Plugin shutdown logic
