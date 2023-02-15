@@ -1,0 +1,7 @@
+name: FakeArmor
+version: '${project.version}'
+main: me.perpltxed.fakearmor.FakeArmor
+api-version: 1.19
+depend: [ ProtocolLib ]
+authors: [ Perpltxed ]
+description: Fakes armor packets for observer 
