@@ -66,6 +66,14 @@
             <id>dmulloy2-repo</id>
             <url>https://repo.dmulloy2.net/repository/public/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>mineinabyss-repo</id>
+            <url>https://repo.mineinabyss.com/#/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -80,6 +88,16 @@
             <artifactId>ProtocolLib</artifactId>
             <version>4.8.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dmulloy2</groupId>
+            <artifactId>PacketWrapper</artifactId>
+            <version>master</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mineinabyss</groupId>
+            <artifactId>protocolburrito</artifactId>
+            <version>0.6.3</version>
         </dependency>
     </dependencies>
 </project>

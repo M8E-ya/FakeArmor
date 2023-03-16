@@ -1,5 +1,6 @@
 package me.perpltxed.fakearmor.events;
 
+import com.comphenix.packetwrapper.WrapperPlayServerEntityEquipment;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -9,115 +10,82 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.Pair;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static me.perpltxed.fakearmor.FakeArmor.Observers;
+
 public abstract class FakeEquipment {
-    public static class EquipmentSendingEvent {
-        private Player client;
 
-        private LivingEntity visibleEntity;
+  private ProtocolManager manager;
 
-        private EnumWrappers.ItemSlot slot;
+  private List<Pair<EnumWrappers.ItemSlot, ItemStack>> pair;
 
-        private ItemStack equipment;
+  public FakeEquipment(Plugin plugin) {
+    this.manager = ProtocolLibrary.getProtocolManager();
+    registerPacketListener(plugin);
+  }
 
-        private EquipmentSendingEvent(Player client, LivingEntity visibleEntity, EnumWrappers.ItemSlot slot, ItemStack equipment) {
-            this.client = client;
-            this.visibleEntity = visibleEntity;
-            this.slot = slot;
-            this.equipment = equipment;
+  private void registerPacketListener(Plugin plugin) {
+    this.manager.addPacketListener(new PacketAdapter(plugin, PacketType.Play.Server.ENTITY_EQUIPMENT) {
+      public void onPacketSending(PacketEvent event) {
+        PacketContainer packet = event.getPacket();
+        WrapperPlayServerEntityEquipment wrapper = new WrapperPlayServerEntityEquipment(packet);
+        Entity entity = wrapper.getEntity(event);
+        if (entity instanceof Player) {
+          Player player = (Player) entity;
+          //checks the player alliance and do stuff
+          boolean isPlayerInWar = true;
+          if (isPlayerInWar) {
+            event.setCancelled(true);
+            List<WrapperPlayServerEntityEquipment> packets = Arrays.asList(getPacketForBoots(player), getPacketForLeggins(player), getPacketForChestplate(player), getPacketForHelmet(player));
+            packets.forEach(packet1 -> Observers.stream().map(Bukkit::getPlayer).forEach(packet1::sendPacket));
+          }
         }
+      }
+    });
+  }
 
-        public Player getClient() {
-            return this.client;
-        }
+  private WrapperPlayServerEntityEquipment getPacketForBoots(Entity entity) {
+    WrapperPlayServerEntityEquipment wrapper = new WrapperPlayServerEntityEquipment(new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT));
+    wrapper.setEntityID(entity.getEntityId());
+    wrapper.setSlot(EnumWrappers.ItemSlot.FEET);
+    wrapper.setItem(new ItemStack(Material.LEATHER_BOOTS));
+    return wrapper;
+  }
 
-        public LivingEntity getVisibleEntity() {
-            return this.visibleEntity;
-        }
+  //create method getPacketForLeggins, getPacketForChestplate, getPacketForHelmet
+  private WrapperPlayServerEntityEquipment getPacketForLeggins(Entity entity) {
+    WrapperPlayServerEntityEquipment wrapper = new WrapperPlayServerEntityEquipment(new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT));
+    wrapper.setEntityID(entity.getEntityId());
+    wrapper.setSlot(EnumWrappers.ItemSlot.LEGS);
+    wrapper.setItem(new ItemStack(Material.LEATHER_LEGGINGS));
+    return wrapper;
+  }
 
-        public ItemStack getEquipment() {
-            return this.equipment;
-        }
+  private WrapperPlayServerEntityEquipment getPacketForChestplate(Entity entity) {
+    WrapperPlayServerEntityEquipment wrapper = new WrapperPlayServerEntityEquipment(new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT));
+    wrapper.setEntityID(entity.getEntityId());
+    wrapper.setSlot(EnumWrappers.ItemSlot.CHEST);
+    wrapper.setItem(new ItemStack(Material.LEATHER_CHESTPLATE));
+    return wrapper;
+  }
 
-        public void setEquipment(ItemStack equipment) {
-            this.equipment = equipment;
-        }
+  private WrapperPlayServerEntityEquipment getPacketForHelmet(Entity entity) {
+    WrapperPlayServerEntityEquipment wrapper = new WrapperPlayServerEntityEquipment(new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT));
+    wrapper.setEntityID(entity.getEntityId());
+    wrapper.setSlot(EnumWrappers.ItemSlot.HEAD);
+    wrapper.setItem(new ItemStack(Material.LEATHER_HELMET));
+    return wrapper;
+  }
 
-        public EnumWrappers.ItemSlot getSlot() {
-            return this.slot;
-        }
-
-        public void setSlot(EnumWrappers.ItemSlot slot) {
-            this.slot = (EnumWrappers.ItemSlot)Preconditions.checkNotNull(slot, "slot cannot be NULL");
-        }
-    }
-
-    private Map<Object, EnumWrappers.ItemSlot> processedPackets = (new MapMaker()).weakKeys().makeMap();
-
-    private Plugin plugin;
-
-    private ProtocolManager manager;
-
-    boolean main = false;
-
-    private PacketListener listener;
-
-    private List<Pair<EnumWrappers.ItemSlot, ItemStack>> pair;
-
-    public FakeEquipment(Plugin plugin) {
-        this.plugin = plugin;
-        this.manager = ProtocolLibrary.getProtocolManager();
-        this.manager.addPacketListener(this.listener = (PacketListener)new PacketAdapter(plugin, new PacketType[] { PacketType.Play.Server.ENTITY_EQUIPMENT }) {
-            public void onPacketSending(PacketEvent event) {
-                PacketContainer packet = event.getPacket();
-                PacketType type = event.getPacketType();
-
-                if (packet.getEntityModifier(event).read(0) instanceof LivingEntity) {
-                    LivingEntity visibleEntity = (LivingEntity) packet.getEntityModifier(event).read(0);
-                    Player observingPlayer = event.getPlayer();
-
-                    if (PacketType.Play.Server.ENTITY_EQUIPMENT.equals(type)) {
-                        FakeEquipment.this.pair = (List) packet.getSlotStackPairLists().read(0);
-                        FakeEquipment.EquipmentSendingEvent sendingEvent = new FakeEquipment.EquipmentSendingEvent(observingPlayer, visibleEntity, (EnumWrappers.ItemSlot) ((Pair) FakeEquipment.this.pair.get(0)).getFirst(), (ItemStack) ((Pair) FakeEquipment.this.pair.get(0)).getSecond());
-                        EnumWrappers.ItemSlot previous = (EnumWrappers.ItemSlot) FakeEquipment.this.processedPackets.get(packet.getHandle());
-
-                        if (FakeEquipment.this.onEquipmentSending(sendingEvent))
-                            FakeEquipment.this.processedPackets.put(packet.getHandle(), (previous != null) ? previous : (EnumWrappers.ItemSlot) ((Pair) FakeEquipment.this.pair.get(0)).getFirst());
-
-                        ItemStack equipment = sendingEvent.getEquipment();
-                        if (equipment != null) {
-                            EnumWrappers.ItemSlot itemSlot = (EnumWrappers.ItemSlot) ((Pair) FakeEquipment.this.pair.get(0)).getFirst();
-
-                            List<Pair<EnumWrappers.ItemSlot, ItemStack>> data = new ArrayList<>();
-
-                            data.add(new Pair(itemSlot, equipment));
-                            packet.getSlotStackPairLists().write(0, data);
-                        }
-                    }
-                } else {
-                    throw new IllegalArgumentException("Unknown packet type:" + type);
-                }
-            }
-
-        });
-    }
-
-    public void close() {
-        if (this.listener != null) {
-            this.manager.removePacketListener(this.listener);
-            this.listener = null;
-        }
-    }
-
-    protected abstract boolean onEquipmentSending(EquipmentSendingEvent paramEquipmentSendingEvent);
 }
