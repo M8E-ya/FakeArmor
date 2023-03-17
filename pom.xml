@@ -24,8 +24,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>9</source>
+                    <target>9</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -70,10 +70,10 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-        <repository>
-            <id>mineinabyss-repo</id>
-            <url>https://repo.mineinabyss.com/#/releases</url>
-        </repository>
+<!--        <repository>-->
+<!--            <id>mineinabyss-repo</id>-->
+<!--            <url>https://repo.mineinabyss.com/#/releases</url>-->
+<!--        </repository>-->
     </repositories>
 
     <dependencies>
@@ -94,10 +94,20 @@
             <artifactId>PacketWrapper</artifactId>
             <version>master</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.mineinabyss</groupId>-->
+<!--            <artifactId>protocolburrito</artifactId>-->
+<!--            <version>0.6.3</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>com.mineinabyss</groupId>
-            <artifactId>protocolburrito</artifactId>
-            <version>0.6.3</version>
+            <groupId>com.github.TownyAdvanced</groupId>
+            <artifactId>SiegeWar</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.TownyAdvanced</groupId>
+            <artifactId>Towny</artifactId>
+            <version>0.98.6.20</version>
         </dependency>
     </dependencies>
 </project>
