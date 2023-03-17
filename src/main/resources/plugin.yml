@@ -2,6 +2,6 @@ name: FakeArmor
 version: '${project.version}'
 main: me.perpltxed.fakearmor.FakeArmor
 api-version: 1.19
-depend: [ ProtocolLib ]
+depend: [ ProtocolLib, Towny, SiegeWar ]
 authors: [ Perpltxed ]
 description: Fakes armor packets for observer 
