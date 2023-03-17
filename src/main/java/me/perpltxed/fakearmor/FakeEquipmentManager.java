@@ -41,13 +41,14 @@ public class FakeEquipmentManager {
   private void registerPacketListener(Plugin plugin) {
     this.manager.addPacketListener(new PacketAdapter(plugin, PacketType.Play.Server.ENTITY_EQUIPMENT) {
       public void onPacketSending(PacketEvent event) {
+        if(event.getPacketType() != PacketType.Play.Server.ENTITY_EQUIPMENT) return; //probably not necessary because the listener already performs the packets filtering
         PacketContainer packet = event.getPacket();
         WrapperPlayServerEntityEquipment wrapper = new WrapperPlayServerEntityEquipment(packet);
         Entity entity = wrapper.getEntity(event);
         if (entity instanceof Player) {
           //Get the government of the player (town or nation)
           Player player = (Player) entity;
-          Resident resident = TownyAPI.getInstance().getResident(player);
+          Resident resident = TownyAPI.getInstance().getResident(player.getUniqueId());
           Optional<Government> government = getGovernment(resident);
           //if a government is found then we check for a siege
           government.ifPresent(government1 -> {
@@ -61,7 +62,7 @@ public class FakeEquipmentManager {
               List<WrapperPlayServerEntityEquipment> greenPackets = Arrays.asList(getPacketForBoots(player, Color.GREEN), getPacketForLeggings(player, Color.GREEN), getPacketForChestplate(player, Color.GREEN), getPacketForHelmet(player, Color.GREEN));
               //we iterate through all the players in the siege zone and send them the correct packet
               siege.getPlayersWhoWereInTheSiegeZone().stream().forEach(playerInSiege -> {
-                Resident residentInSiege = TownyAPI.getInstance().getResident(playerInSiege);
+                Resident residentInSiege = TownyAPI.getInstance().getResident(playerInSiege.getUniqueId());
                 Optional<Government> governmentInSiege = getGovernment(residentInSiege);
                 governmentInSiege.ifPresent(governmentInSiege2 -> {
                   if (governmentInSiege2.equals(government1)) {
