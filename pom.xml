@@ -83,7 +83,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.19.3-R0.1-SNAPSHOT</version>
+            <version>1.20.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -111,8 +111,8 @@
         </dependency>
         <dependency>
             <groupId>com.palmergames.bukkit.towny</groupId>
-            <artifactId>Towny</artifactId>
-            <version>0.98.6.0</version>
+            <artifactId>towny</artifactId>
+            <version>0.99.3.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
